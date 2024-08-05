@@ -15,32 +15,32 @@
       </label>
     </div>
 
-    <div v-if="displayedTimers.length === 0 && showArchive" class="text-center text-gray-500 py-8">
-      В архиве пока нет таймеров. Архивируйте таймер, чтобы он появился здесь.
+    <div v-if="displayedItems.length === 0 && showArchive" class="text-center text-gray-500 py-8">
+      В архиве пока нет элементов. Архивируйте таймер или счетчик, чтобы он появился здесь.
     </div>
 
     <div v-else class="space-y-4">
-      <!-- Список таймеров -->
-      <div v-for="timer in displayedTimers" :key="timer.id"
-        class="rounded-lg shadow p-4 transition-colors duration-1100" :class="{
-          'bg-white': !timer.archived,
-          'bg-gray-300': timer.archived,
-          'border-2 border-green-500': timer.running && !timer.archived,
-          'deleting-animation': timer.deleting
-        }" :style="{ backgroundColor: timer.deleteProgress ? getDeleteColor(timer.deleteProgress) : '' }">
+      <!-- Список таймеров и счетчиков -->
+      <div v-for="item in displayedItems" :key="item.id" class="rounded-lg shadow p-4 transition-colors duration-1100"
+        :class="{
+          'bg-white': !item.archived,
+          'bg-gray-300': item.archived,
+          'border-2 border-green-500': item.running && !item.archived,
+          'deleting-animation': item.deleting
+        }" :style="{ backgroundColor: item.deleteProgress ? getDeleteColor(item.deleteProgress) : '' }">
         <div class="flex justify-between items-start mb-2">
           <div class="flex-grow mr-2">
-            <p v-if="!timer.isEditing || timer.archived" @click="startEditing(timer)"
+            <p v-if="!item.isEditing || item.archived" @click="startEditing(item)"
               class="text-lg font-semibold px-2 py-1 cursor-pointer hover:bg-gray-100 rounded whitespace-pre-wrap"
-              :class="{ 'cursor-default hover:bg-transparent': timer.archived }">{{ timer.name }}</p>
-            <textarea v-else v-model="timer.name" @blur="finishEditing(timer)"
-              @keydown.enter.prevent="finishEditing(timer)"
+              :class="{ 'cursor-default hover:bg-transparent': item.archived }">{{ item.name }}</p>
+            <textarea v-else v-model="item.name" @blur="finishEditing(item)"
+              @keydown.enter.prevent="finishEditing(item)"
               class="text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 w-full resize-none overflow-hidden"
-              :ref="el => { if (el) textareaRefs[timer.id] = el }" rows="1"></textarea>
+              :ref="el => { if (el) textareaRefs[item.id] = el }" rows="1"></textarea>
           </div>
           <div class="flex items-start space-x-2">
-            <button @click="toggleArchive(timer)" class="text-blue-500 hover:text-blue-700 flex-shrink-0">
-              <svg v-if="!timer.archived" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+            <button @click="toggleArchive(item)" class="text-blue-500 hover:text-blue-700 flex-shrink-0">
+              <svg v-if="!item.archived" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
                 viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
@@ -51,9 +51,9 @@
                   d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
               </svg>
             </button>
-            <button v-if="timer.archived" @mousedown="startDeleteTimer(timer)" @mouseup="cancelDeleteTimer(timer)"
-              @mouseleave="cancelDeleteTimer(timer)" @touchstart.prevent="startDeleteTimer(timer)"
-              @touchend.prevent="cancelDeleteTimer(timer)" @touchcancel.prevent="cancelDeleteTimer(timer)"
+            <button v-if="item.archived" @mousedown="startDeleteItem(item)" @mouseup="cancelDeleteItem(item)"
+              @mouseleave="cancelDeleteItem(item)" @touchstart.prevent="startDeleteItem(item)"
+              @touchend.prevent="cancelDeleteItem(item)" @touchcancel.prevent="cancelDeleteItem(item)"
               class="text-red-500 hover:text-red-700 flex-shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
@@ -63,23 +63,42 @@
             </button>
           </div>
         </div>
-        <div class="text-3xl font-bold text-center mb-2">{{ formatTime(timer.elapsedTime) }}</div>
-        <div v-if="!timer.archived" class="flex justify-center space-x-2">
-          <button @click="startTimer(timer)" class="px-4 py-2 rounded text-white"
-            :class="timer.running ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'"
-            :disabled="timer.running">
-            {{ timer.running ? 'Запущен' : 'Старт' }}
-          </button>
-          <button @click="stopTimer(timer)" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
-            :disabled="!timer.running">Стоп</button>
+        <div class="text-3xl font-bold text-center mb-2">
+          {{ item.type === 'timer' ? formatTime(item.elapsedTime) : item.count }}
+        </div>
+        <div v-if="!item.archived" class="flex justify-center space-x-2">
+          <template v-if="item.type === 'timer'">
+            <button @click="startTimer(item)" class="px-4 py-2 rounded text-white"
+              :class="item.running ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'"
+              :disabled="item.running">
+              {{ item.running ? 'Запущен' : 'Старт' }}
+            </button>
+            <button @click="stopTimer(item)" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+              :disabled="!item.running">Стоп</button>
+          </template>
+          <template v-else>
+            <button @click="incrementCounter(item)" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+              +
+            </button>
+            <button @click="decrementCounter(item)" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              :disabled="item.count === 0">
+              -
+            </button>
+          </template>
         </div>
       </div>
 
-      <!-- Кнопка добавления нового таймера -->
-      <button v-if="!showArchive" @click="addNewTimer"
-        class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">
-        Добавить новый таймер
-      </button>
+      <!-- Кнопки добавления нового таймера и счетчика -->
+      <div v-if="!showArchive" class="flex space-x-2">
+        <button @click="addNewItem('timer')"
+          class="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">
+          Добавить таймер
+        </button>
+        <button @click="addNewItem('counter')"
+          class="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition duration-300">
+          Добавить счетчик
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -88,23 +107,23 @@
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 
 const showArchive = ref(false)
-const timers = ref([])
+const items = ref([])
 const textareaRefs = ref({})
 
-const displayedTimers = computed(() => {
-  const filteredTimers = timers.value.filter(timer => timer.archived === showArchive.value)
+const displayedItems = computed(() => {
+  const filteredItems = items.value.filter(item => item.archived === showArchive.value)
   if (showArchive.value) {
-    return filteredTimers.sort((a, b) => b.archivedAt - a.archivedAt)
+    return filteredItems.sort((a, b) => b.archivedAt - a.archivedAt)
   } else {
-    return filteredTimers.sort((a, b) => a.createdAt - b.createdAt)
+    return filteredItems.sort((a, b) => a.createdAt - b.createdAt)
   }
 })
 
-const startEditing = (timer) => {
-  if (!timer.archived) {
-    timer.isEditing = true
+const startEditing = (item) => {
+  if (!item.archived) {
+    item.isEditing = true
     nextTick(() => {
-      const textarea = textareaRefs.value[timer.id]
+      const textarea = textareaRefs.value[item.id]
       if (textarea) {
         textarea.focus()
         autoResize(textarea)
@@ -130,10 +149,11 @@ const getDeleteColor = (progress) => {
 
   return `rgb(${r}, ${g}, ${b})`;
 }
-const finishEditing = (timer) => {
-  timer.isEditing = false
-  timer.lastModified = Date.now()
-  saveTimers()
+
+const finishEditing = (item) => {
+  item.isEditing = false
+  item.lastModified = Date.now()
+  saveItems()
 }
 
 const autoResize = (textarea) => {
@@ -141,79 +161,86 @@ const autoResize = (textarea) => {
   textarea.style.height = textarea.scrollHeight + 'px'
 }
 
-const getNextTimerName = () => {
-  const existingNames = timers.value.map(t => t.name)
+const getNextItemName = (type) => {
+  const existingNames = items.value.filter(i => i.type === type).map(i => i.name)
   let index = 1
-  let newName = `Таймер ${index}`
+  let newName = `${type === 'timer' ? 'Таймер' : 'Счетчик'} ${index}`
   while (existingNames.includes(newName)) {
     index++
-    newName = `Таймер ${index}`
+    newName = `${type === 'timer' ? 'Таймер' : 'Счетчик'} ${index}`
   }
   return newName
 }
 
-const addNewTimer = () => {
-  const newId = timers.value.length > 0 ? Math.max(...timers.value.map(t => t.id)) + 1 : 1
+const addNewItem = (type) => {
+  const newId = items.value.length > 0 ? Math.max(...items.value.map(i => i.id)) + 1 : 1
   const now = Date.now()
-  timers.value.push({
+  const newItem = {
     id: newId,
-    name: getNextTimerName(),
-    elapsedTime: 0,
+    type: type,
+    name: getNextItemName(type),
     isEditing: false,
     archived: false,
     createdAt: now,
     lastModified: now,
-    running: false,
-    lastStartTime: null,
-    archivedAt: null,
     deleting: false,
     deleteProgress: 0
-  })
-  saveTimers()
-}
+  }
 
-const toggleArchive = (timer) => {
-  if (!timer.archived) {
-    stopTimer(timer)
-    timer.archivedAt = Date.now()
+  if (type === 'timer') {
+    newItem.elapsedTime = 0
+    newItem.running = false
+    newItem.lastStartTime = null
   } else {
-    timer.archivedAt = null
+    newItem.count = 0
   }
-  timer.archived = !timer.archived
-  timer.lastModified = Date.now()
-  saveTimers()
+
+  items.value.push(newItem)
+  saveItems()
 }
 
-const startDeleteTimer = (timer) => {
-  timer.deleting = true
-  timer.deleteStartTime = Date.now()
-  timer.deleteAnimationFrame = requestAnimationFrame(() => updateDeleteProgress(timer))
-}
-
-const updateDeleteProgress = (timer) => {
-  const elapsed = Date.now() - timer.deleteStartTime
-  timer.deleteProgress = Math.min(elapsed / 1100, 1)
-
-  if (timer.deleteProgress < 1) {
-    timer.deleteAnimationFrame = requestAnimationFrame(() => updateDeleteProgress(timer))
+const toggleArchive = (item) => {
+  if (!item.archived) {
+    if (item.type === 'timer') stopTimer(item)
+    item.archivedAt = Date.now()
   } else {
-    deleteTimer(timer)
+    item.archivedAt = null
+  }
+  item.archived = !item.archived
+  item.lastModified = Date.now()
+  saveItems()
+}
+
+const startDeleteItem = (item) => {
+  item.deleting = true
+  item.deleteStartTime = Date.now()
+  item.deleteAnimationFrame = requestAnimationFrame(() => updateDeleteProgress(item))
+}
+
+const updateDeleteProgress = (item) => {
+  const elapsed = Date.now() - item.deleteStartTime
+  item.deleteProgress = Math.min(elapsed / 1100, 1)
+
+  if (item.deleteProgress < 1) {
+    item.deleteAnimationFrame = requestAnimationFrame(() => updateDeleteProgress(item))
+  } else {
+    deleteItem(item)
   }
 }
 
-const cancelDeleteTimer = (timer) => {
-  if (timer.deleting) {
-    cancelAnimationFrame(timer.deleteAnimationFrame)
-    timer.deleting = false
-    timer.deleteProgress = 0
+const cancelDeleteItem = (item) => {
+  if (item.deleting) {
+    cancelAnimationFrame(item.deleteAnimationFrame)
+    item.deleting = false
+    item.deleteProgress = 0
   }
 }
 
-const deleteTimer = (timer) => {
-  const index = timers.value.findIndex(t => t.id === timer.id)
+const deleteItem = (item) => {
+  const index = items.value.findIndex(i => i.id === item.id)
   if (index !== -1) {
-    timers.value.splice(index, 1)
-    saveTimers()
+    items.value.splice(index, 1)
+    saveItems()
   }
 }
 
@@ -221,7 +248,7 @@ const startTimer = (timer) => {
   if (!timer.running && !timer.archived) {
     timer.running = true
     timer.lastStartTime = Date.now()
-    saveTimers()
+    saveItems()
   }
 }
 
@@ -231,19 +258,33 @@ const stopTimer = (timer) => {
     timer.elapsedTime += Date.now() - timer.lastStartTime
     timer.lastStartTime = null
     timer.lastModified = Date.now()
-    saveTimers()
+    saveItems()
+  }
+}
+
+const incrementCounter = (counter) => {
+  counter.count++
+  counter.lastModified = Date.now()
+  saveItems()
+}
+
+const decrementCounter = (counter) => {
+  if (counter.count > 0) {
+    counter.count--
+    counter.lastModified = Date.now()
+    saveItems()
   }
 }
 
 const updateRunningTimers = () => {
   const now = Date.now()
-  timers.value.forEach(timer => {
-    if (timer.running) {
-      timer.elapsedTime = timer.elapsedTime + (now - timer.lastStartTime)
-      timer.lastStartTime = now
+  items.value.forEach(item => {
+    if (item.type === 'timer' && item.running) {
+      item.elapsedTime = item.elapsedTime + (now - item.lastStartTime)
+      item.lastStartTime = now
     }
   })
-  saveTimers()
+  saveItems()
 }
 
 const formatTime = (ms) => {
@@ -255,22 +296,22 @@ const formatTime = (ms) => {
     .join(":")
 }
 
-const saveTimers = () => {
-  localStorage.setItem('timers', JSON.stringify(timers.value))
+const saveItems = () => {
+  localStorage.setItem('items', JSON.stringify(items.value))
 }
 
-const loadTimers = () => {
-  const savedTimers = localStorage.getItem('timers')
-  if (savedTimers) {
-    timers.value = JSON.parse(savedTimers)
+const loadItems = () => {
+  const savedItems = localStorage.getItem('items')
+  if (savedItems) {
+    items.value = JSON.parse(savedItems)
     const now = Date.now()
-    timers.value.forEach(timer => {
-      if (timer.running) {
-        timer.elapsedTime += now - timer.lastStartTime
-        timer.lastStartTime = now
+    items.value.forEach(item => {
+      if (item.type === 'timer' && item.running) {
+        item.elapsedTime += now - item.lastStartTime
+        item.lastStartTime = now
       }
-      timer.deleting = false
-      timer.deleteProgress = 0
+      item.deleting = false
+      item.deleteProgress = 0
     })
   }
 }
@@ -278,7 +319,7 @@ const loadTimers = () => {
 let intervalId
 
 onMounted(() => {
-  loadTimers()
+  loadItems()
   intervalId = setInterval(updateRunningTimers, 1000)
 })
 
@@ -286,8 +327,8 @@ onUnmounted(() => {
   clearInterval(intervalId)
 })
 
-watch(timers, () => {
-  saveTimers()
+watch(items, () => {
+  saveItems()
 }, { deep: true })
 </script>
 
