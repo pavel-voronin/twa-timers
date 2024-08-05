@@ -21,8 +21,8 @@
 
     <div v-else class="space-y-4">
       <!-- Список таймеров -->
-      <div v-for="timer in displayedTimers" :key="timer.id" class="bg-white rounded-lg shadow p-4"
-        :class="{ 'bg-gray-100': timer.archived, 'border-2 border-green-500': timer.running && !timer.archived }">
+      <div v-for="timer in displayedTimers" :key="timer.id" class="rounded-lg shadow p-4"
+        :class="{ 'bg-gray-100': timer.archived, 'bg-white': !timer.archived, 'border-2 border-green-500': timer.running && !timer.archived }">
         <div class="flex justify-between items-start mb-2">
           <div class="flex-grow mr-2">
             <p v-if="!timer.isEditing || timer.archived" @click="startEditing(timer)"
