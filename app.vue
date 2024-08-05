@@ -158,7 +158,7 @@ const addNewTimer = () => {
   timers.value.push({
     id: newId,
     name: getNextTimerName(),
-    elapsedTime: 1000 * 60 * 60 * 760,
+    elapsedTime: 0,
     isEditing: false,
     archived: false,
     createdAt: now,
