@@ -302,6 +302,8 @@ const saveItems = () => {
 
 const loadItems = () => {
   const savedItems = localStorage.getItem('items')
+  const savedTimers = localStorage.getItem('timers')
+
   if (savedItems) {
     items.value = JSON.parse(savedItems)
     const now = Date.now()
@@ -313,6 +315,24 @@ const loadItems = () => {
       item.deleting = false
       item.deleteProgress = 0
     })
+  } else if (savedTimers) {
+    // Миграция старых данных
+    const oldTimers = JSON.parse(savedTimers)
+    items.value = oldTimers.map(timer => ({
+      ...timer,
+      type: 'timer',
+      count: 0, // Добавляем поле count для совместимости с новой структурой
+    }))
+
+    // Сохраняем мигрированные данные в новом формате
+    saveItems()
+
+    // Удаляем старые данные
+    localStorage.removeItem('timers')
+
+    console.log('Миграция данных завершена')
+  } else {
+    items.value = []
   }
 }
 
