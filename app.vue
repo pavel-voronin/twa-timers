@@ -21,8 +21,13 @@
 
     <div v-else class="space-y-4">
       <!-- Список таймеров -->
-      <div v-for="timer in displayedTimers" :key="timer.id" class="rounded-lg shadow p-4"
-        :class="{ 'bg-gray-100': timer.archived, 'bg-white': !timer.archived, 'border-2 border-green-500': timer.running && !timer.archived }">
+      <div v-for="timer in displayedTimers" :key="timer.id"
+        class="rounded-lg shadow p-4 transition-colors duration-1100" :class="{
+          'bg-white': !timer.archived,
+          'bg-gray-300': timer.archived,
+          'border-2 border-green-500': timer.running && !timer.archived,
+          'deleting-animation': timer.deleting
+        }" :style="{ backgroundColor: timer.deleteProgress ? getDeleteColor(timer.deleteProgress) : '' }">
         <div class="flex justify-between items-start mb-2">
           <div class="flex-grow mr-2">
             <p v-if="!timer.isEditing || timer.archived" @click="startEditing(timer)"
@@ -33,8 +38,8 @@
               class="text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 w-full resize-none overflow-hidden"
               :ref="el => { if (el) textareaRefs[timer.id] = el }" rows="1"></textarea>
           </div>
-          <div class="flex items-start">
-            <button @click="toggleArchive(timer)" class="text-blue-500 hover:text-blue-700 flex-shrink-0 mr-2">
+          <div class="flex items-start space-x-2">
+            <button @click="toggleArchive(timer)" class="text-blue-500 hover:text-blue-700 flex-shrink-0">
               <svg v-if="!timer.archived" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
                 viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -46,7 +51,9 @@
                   d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
               </svg>
             </button>
-            <button v-if="timer.archived" @click="deleteTimer(timer)"
+            <button v-if="timer.archived" @mousedown="startDeleteTimer(timer)" @mouseup="cancelDeleteTimer(timer)"
+              @mouseleave="cancelDeleteTimer(timer)" @touchstart.prevent="startDeleteTimer(timer)"
+              @touchend.prevent="cancelDeleteTimer(timer)" @touchcancel.prevent="cancelDeleteTimer(timer)"
               class="text-red-500 hover:text-red-700 flex-shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
@@ -106,6 +113,23 @@ const startEditing = (timer) => {
   }
 }
 
+const getDeleteColor = (progress) => {
+  // Начальный цвет bg-gray-300 в RGB: 209, 213, 219
+  const startR = 209;
+  const startG = 213;
+  const startB = 219;
+
+  // Конечный цвет (красный): 255, 0, 0
+  const endR = 255;
+  const endG = 0;
+  const endB = 0;
+
+  const r = Math.round(startR + (endR - startR) * progress);
+  const g = Math.round(startG + (endG - startG) * progress);
+  const b = Math.round(startB + (endB - startB) * progress);
+
+  return `rgb(${r}, ${g}, ${b})`;
+}
 const finishEditing = (timer) => {
   timer.isEditing = false
   timer.lastModified = Date.now()
@@ -134,14 +158,16 @@ const addNewTimer = () => {
   timers.value.push({
     id: newId,
     name: getNextTimerName(),
-    elapsedTime: 0,
+    elapsedTime: 1000 * 60 * 60 * 760,
     isEditing: false,
     archived: false,
     createdAt: now,
     lastModified: now,
     running: false,
     lastStartTime: null,
-    archivedAt: null
+    archivedAt: null,
+    deleting: false,
+    deleteProgress: 0
   })
   saveTimers()
 }
@@ -156,6 +182,31 @@ const toggleArchive = (timer) => {
   timer.archived = !timer.archived
   timer.lastModified = Date.now()
   saveTimers()
+}
+
+const startDeleteTimer = (timer) => {
+  timer.deleting = true
+  timer.deleteStartTime = Date.now()
+  timer.deleteAnimationFrame = requestAnimationFrame(() => updateDeleteProgress(timer))
+}
+
+const updateDeleteProgress = (timer) => {
+  const elapsed = Date.now() - timer.deleteStartTime
+  timer.deleteProgress = Math.min(elapsed / 1100, 1)
+
+  if (timer.deleteProgress < 1) {
+    timer.deleteAnimationFrame = requestAnimationFrame(() => updateDeleteProgress(timer))
+  } else {
+    deleteTimer(timer)
+  }
+}
+
+const cancelDeleteTimer = (timer) => {
+  if (timer.deleting) {
+    cancelAnimationFrame(timer.deleteAnimationFrame)
+    timer.deleting = false
+    timer.deleteProgress = 0
+  }
 }
 
 const deleteTimer = (timer) => {
@@ -198,7 +249,7 @@ const updateRunningTimers = () => {
 const formatTime = (ms) => {
   const seconds = Math.floor((ms / 1000) % 60)
   const minutes = Math.floor((ms / (1000 * 60)) % 60)
-  const hours = Math.floor((ms / (1000 * 60 * 60)) % 24)
+  const hours = Math.floor(ms / (1000 * 60 * 60))
   return [hours, minutes, seconds]
     .map(v => v < 10 ? "0" + v : v)
     .join(":")
@@ -218,6 +269,8 @@ const loadTimers = () => {
         timer.elapsedTime += now - timer.lastStartTime
         timer.lastStartTime = now
       }
+      timer.deleting = false
+      timer.deleteProgress = 0
     })
   }
 }
@@ -255,5 +308,9 @@ button:disabled {
 textarea {
   min-height: 1.5em;
   line-height: 1.5;
+}
+
+.deleting-animation {
+  transition: background-color 1.1s linear;
 }
 </style>
