@@ -1,75 +1,35 @@
-# Nuxt 3 Minimal Starter
+# ⏱️ Telegram Timer Bot
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+A handy timer bot for Telegram that helps you keep track of multiple timers.
 
-## Setup
+## What's This All About?
 
-Make sure to install the dependencies:
+This bot allows you to create, manage, and archive multiple timers directly within Telegram (any browser basically). Perfect for tracking various tasks or activities simultaneously.
 
-```bash
-# npm
-npm install
+## Features
 
-# pnpm
-pnpm install
+- 🕰️ Create and manage multiple timers
+- 📁 Archive timers for later use
+- 💾 Persistent storage using localStorage
+- 📱 Works as a Telegram Mini App
 
-# yarn
-yarn install
+## How to Set It Up
 
-# bun
-bun install
-```
+1. Clone this repository
+2. Set up your Telegram bot through @BotFather
+3. Connect the bot to this Mini App URL: `https://yourusername.github.io/your-repo-name`
+4. You're all set!
 
-## Development Server
+## Technical Details
 
-Start the development server on `http://localhost:3000`:
+- State is stored in localStorage, ensuring persistence across sessions
+- GitHub Actions automatically compile and deploy the static site to GitHub Pages
+- The resulting URL is used by your bot to serve the Mini App
 
-```bash
-# npm
-npm run dev
+## License
 
-# pnpm
-pnpm run dev
+This project is licensed under the MIT License.
 
-# yarn
-yarn dev
+## Created By
 
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm run build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm run preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+Pavel Voronin (https://github.com/pavel-voronin) in 2024
