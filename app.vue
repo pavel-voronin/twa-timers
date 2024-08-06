@@ -63,11 +63,11 @@
             </button>
           </div>
         </div>
-        <div class="text-3xl font-bold text-center mb-2">
-          {{ item.type === 'timer' ? formatTime(item.elapsedTime) : item.count }}
-        </div>
-        <div v-if="!item.archived" class="flex justify-center space-x-2">
-          <template v-if="item.type === 'timer'">
+        <template v-if="item.type === 'timer'">
+          <div class="text-3xl font-bold text-center mb-2">
+            {{ formatTime(item.elapsedTime) }}
+          </div>
+          <div v-if="!item.archived" class="flex justify-center space-x-2">
             <button @click="startTimer(item)" class="px-4 py-2 rounded text-white"
               :class="item.running ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'"
               :disabled="item.running">
@@ -75,17 +75,29 @@
             </button>
             <button @click="stopTimer(item)" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
               :disabled="!item.running">Стоп</button>
-          </template>
-          <template v-else>
-            <button @click="incrementCounter(item)" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-              +
-            </button>
-            <button @click="decrementCounter(item)" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+          </div>
+        </template>
+        <template v-else>
+          <div v-if="!item.archived" class="flex justify-center items-center space-x-4">
+            <button @click="decrementCounter(item)"
+              class="bg-red-500 text-white w-16 h-16 flex items-center justify-center text-4xl font-bold rounded hover:bg-red-600 transition-colors"
               :disabled="item.count === 0">
-              -
+              <span class="transform translate-y-[-2px]">-</span>
             </button>
-          </template>
-        </div>
+
+            <div class="text-5xl font-bold text-center w-32 flex items-center justify-center">
+              {{ item.count }}
+            </div>
+
+            <button @click="incrementCounter(item)"
+              class="bg-blue-500 text-white w-16 h-16 flex items-center justify-center text-4xl font-bold rounded hover:bg-blue-600 transition-colors">
+              <span class="transform translate-y-[-2px]">+</span>
+            </button>
+          </div>
+          <div v-else class="text-5xl font-bold text-center flex items-center justify-center">
+              {{ item.count }}
+            </div>
+        </template>
       </div>
 
       <!-- Кнопки добавления нового таймера и счетчика -->
