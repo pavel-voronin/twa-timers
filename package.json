@@ -11,7 +11,12 @@
   },
   "dependencies": {
     "@nuxtjs/tailwindcss": "^6.12.1",
-    "nuxt": "^3.12.4",
-    "vue": "latest"
+    "@pinia/nuxt": "^0.5.4",
+    "@vueuse/core": "^11.0.3",
+    "@vueuse/nuxt": "^11.0.3",
+    "nuxt": "^3.13.0",
+    "pinia": "^2.2.2",
+    "vue": "latest",
+    "vue-router": "latest"
   }
 }
