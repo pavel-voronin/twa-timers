@@ -1,6 +1,13 @@
 <template>
   <div class="container mx-auto px-4 py-8">
     <!-- Переключатель архива -->
+    <div v-for="project in useProjectsStore().projects" :key="project.id"
+      @click="useProjectsStore().selectProject(project)" class="cursor-pointer">
+      choose project: {{ project.name }}
+    </div>
+    <div v-if="useProjectsStore().currentProject" @click="useProjectsStore().quitProject" class="cursor-pointer">
+      &larr; quit project: {{ useProjectsStore().currentProject?.name }}
+    </div>
     <ArchiveToggle v-model="showArchive" />
 
     <div v-if="displayedItems.length === 0 && showArchive" class="text-center text-gray-500 py-8">
@@ -37,4 +44,6 @@ const displayedItems = computed(() => {
     return items.value.filter(item => !item.archived).sort((a, b) => a.createdAt - b.createdAt)
   }
 })
+
+watch(() => useProjectsStore().currentProject, () => showArchive.value = false)
 </script>
