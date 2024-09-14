@@ -67,13 +67,16 @@ export const useItemsStore = defineStore("items", () => {
 
   const filteredItems = computed(() => {
     if (currentItemId.value) {
-      return [
-        items.value.find((item) => item.id === currentItemId.value)!,
-        ...items.value.filter((item) => item.parentId === currentItemId.value),
-      ];
+      return items.value.filter(
+        (item) => item.parentId === currentItemId.value
+      );
     } else {
       return items.value.filter((item) => item.parentId === undefined);
     }
+  });
+
+  const archivedItems = computed(() => {
+    return items.value.filter((item) => item.archived);
   });
 
   const getNextItemName = (type: Item["type"]) => {
@@ -227,8 +230,10 @@ export const useItemsStore = defineStore("items", () => {
 
   setInterval(updateRunningTimers, 1000);
 
-  const selectFolder = (folder: Item) => {
-    if (folder.type === "folder") {
+  const selectFolder = (folder?: Item) => {
+    if (folder === undefined) {
+      currentItemId.value = null;
+    } else if (folder.type === "folder") {
       currentItemId.value = folder.id;
     }
   };
@@ -241,6 +246,7 @@ export const useItemsStore = defineStore("items", () => {
 
   return {
     items: filteredItems,
+    archivedItems,
     currentItem,
     addNewTimer,
     addNewCounter,

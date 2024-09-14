@@ -1,6 +1,7 @@
 <template>
   <div class="px-4 py-8 space-y-4">
-    <div class="flex justify-end items-center">
+    <div class="flex justify-between items-center">
+      <Breadcrumbs />
       <ArchiveToggle v-model="showArchive" />
     </div>
 
@@ -13,7 +14,7 @@
     <div v-else class="space-y-4">
       <div v-if="displayedItems.length === 0 && !showArchive">
         <EmptyCard>
-          В проекте ещё нет никаких элементов. Добавьте таймер или счётчик, чтобы они появились здесь.
+          В папке ещё нет никаких элементов. Добавьте таймер или счётчик, чтобы они появились здесь.
         </EmptyCard>
       </div>
 
@@ -42,10 +43,11 @@
 <script setup lang="ts">
 const showArchive = ref(false)
 const items = storeToRefs(useItemsStore()).items
+const archivedItems = storeToRefs(useItemsStore()).archivedItems
 
 const displayedItems = computed(() => {
   if (showArchive.value) {
-    return items.value.filter(item => item.archived).sort((a, b) => b.archivedAt - a.archivedAt)
+    return archivedItems.value.filter(item => item.archived).sort((a, b) => b.archivedAt - a.archivedAt)
   } else {
     return items.value.filter(item => !item.archived).sort((a, b) => a.createdAt - b.createdAt)
   }
