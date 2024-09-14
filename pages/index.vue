@@ -1,22 +1,24 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
-    <!-- Переключатель архива -->
-    <div v-for="project in useProjectsStore().projects" :key="project.id"
-      @click="useProjectsStore().selectProject(project)" class="cursor-pointer">
-      choose project: {{ project.name }}
+  <div class="px-4 py-8 space-y-4">
+    <div class="flex justify-end items-center">
+      <ArchiveToggle v-model="showArchive" />
     </div>
-    <div v-if="useProjectsStore().currentProject" @click="useProjectsStore().quitProject" class="cursor-pointer">
-      &larr; quit project: {{ useProjectsStore().currentProject?.name }}
-    </div>
-    <ArchiveToggle v-model="showArchive" />
 
-    <div v-if="displayedItems.length === 0 && showArchive" class="text-center text-gray-500 py-8">
-      В архиве пока нет элементов. Архивируйте таймер или счетчик, чтобы он появился здесь.
+    <div v-if="displayedItems.length === 0 && showArchive">
+      <EmptyCard>
+        В архиве пока нет элементов. Архивируйте таймер или счетчик, чтобы он появился здесь.
+      </EmptyCard>
     </div>
 
     <div v-else class="space-y-4">
+      <div v-if="displayedItems.length === 0 && !showArchive">
+        <EmptyCard>
+          В проекте ещё нет никаких элементов. Добавьте таймер или счётчик, чтобы они появились здесь.
+        </EmptyCard>
+      </div>
+
       <!-- Список таймеров и счетчиков -->
-      <Item v-for="item in displayedItems" :key="item.id" :item="item" />
+      <Item v-else v-for="item in displayedItems" :key="item.id" :item="item" />
 
       <!-- Кнопки добавления нового таймера и счетчика -->
       <div v-if="!showArchive" class="flex space-x-2">
