@@ -3,6 +3,10 @@ type Counter = {
   count: number;
 };
 
+type Folder = {
+  type: "folder";
+};
+
 type RunningTimer = {
   running: true;
   lastStartTime: number;
@@ -29,10 +33,11 @@ type Archived = {
 
 export type Item = {
   id: number;
+  parentId?: number;
   name: string;
   createdAt: number;
   lastModified: number;
-} & (Timer | Counter) &
+} & (Timer | Counter | Folder) &
   (Live | Archived);
 
 export const useItemsStore = defineStore("items", () => {
@@ -48,27 +53,64 @@ export const useItemsStore = defineStore("items", () => {
     });
   }
 
+  const currentItemId = useLocalStorage<number | null>(
+    "current_item_id",
+    null,
+    {
+      serializer: NumberSerializer,
+    }
+  );
+
+  const currentItem = computed(() => {
+    return items.value.find((item) => item.id === currentItemId.value);
+  });
+
+  const filteredItems = computed(() => {
+    if (currentItemId.value) {
+      return [
+        items.value.find((item) => item.id === currentItemId.value)!,
+        ...items.value.filter((item) => item.parentId === currentItemId.value),
+      ];
+    } else {
+      return items.value.filter((item) => item.parentId === undefined);
+    }
+  });
+
   const getNextItemName = (type: Item["type"]) => {
-    const existingNames = items.value
+    const typeNames: { [key in Item["type"]]: string } = {
+      timer: "Таймер",
+      counter: "Счетчик",
+      folder: "Папка",
+    };
+
+    const existingNames = filteredItems.value
       .filter((i) => i.type === type)
       .map((i) => i.name);
+
     let index = 1;
-    let newName = `${type === "timer" ? "Таймер" : "Счетчик"} ${index}`;
+    let newName = `${typeNames[type]} ${index}`;
+
     while (existingNames.includes(newName)) {
       index++;
-      newName = `${type === "timer" ? "Таймер" : "Счетчик"} ${index}`;
+      newName = `${typeNames[type]} ${index}`;
     }
+
     return newName;
   };
 
+  function getNewId() {
+    return items.value.length > 0
+      ? Math.max(...items.value.map((i) => i.id)) + 1
+      : 1;
+  }
+
   const addNewTimer = () => {
-    const newId =
-      items.value.length > 0
-        ? Math.max(...items.value.map((i) => i.id)) + 1
-        : 1;
+    const newId = getNewId();
     const now = Date.now();
+
     const newItem: Item = {
       id: newId,
+      parentId: currentItemId.value ?? undefined,
       type: "timer",
       name: getNextItemName("timer"),
       archived: false,
@@ -84,16 +126,33 @@ export const useItemsStore = defineStore("items", () => {
   };
 
   const addNewCounter = () => {
-    const newId =
-      items.value.length > 0
-        ? Math.max(...items.value.map((i) => i.id)) + 1
-        : 1;
+    const newId = getNewId();
     const now = Date.now();
+
     const newItem: Item = {
       id: newId,
+      parentId: currentItemId.value ?? undefined,
       type: "counter",
       count: 0,
       name: getNextItemName("counter"),
+      archived: false,
+      createdAt: now,
+      lastModified: now,
+      archivedAt: null,
+    };
+
+    items.value.push(newItem);
+  };
+
+  const addNewFolder = () => {
+    const newId = getNewId();
+    const now = Date.now();
+
+    const newItem: Item = {
+      id: newId,
+      parentId: currentItemId.value ?? undefined,
+      type: "folder",
+      name: getNextItemName("folder"),
       archived: false,
       createdAt: now,
       lastModified: now,
@@ -168,8 +227,21 @@ export const useItemsStore = defineStore("items", () => {
 
   setInterval(updateRunningTimers, 1000);
 
+  const selectFolder = (folder: Item) => {
+    if (folder.type === "folder") {
+      currentItemId.value = folder.id;
+    }
+  };
+
+  const quitFolder = (folder: Item) => {
+    if (folder.type === "folder") {
+      currentItemId.value = folder.parentId ?? null;
+    }
+  };
+
   return {
-    items,
+    items: filteredItems,
+    currentItem,
     addNewTimer,
     addNewCounter,
     startTimer,
@@ -177,6 +249,9 @@ export const useItemsStore = defineStore("items", () => {
     toggleArchive,
     incrementCounter,
     decrementCounter,
+    addNewFolder,
     deleteItem,
+    selectFolder,
+    quitFolder,
   };
 });

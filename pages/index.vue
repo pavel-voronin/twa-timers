@@ -30,6 +30,10 @@
           class="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition duration-300">
           Добавить счетчик
         </button>
+        <button @click="useItemsStore().addNewFolder"
+          class="flex-1 bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition duration-300">
+          Добавить папку
+        </button>
       </div>
     </div>
   </div>
