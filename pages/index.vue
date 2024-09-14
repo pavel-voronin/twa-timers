@@ -46,6 +46,4 @@ const displayedItems = computed(() => {
     return items.value.filter(item => !item.archived).sort((a, b) => a.createdAt - b.createdAt)
   }
 })
-
-watch(() => useProjectsStore().currentProject, () => showArchive.value = false)
 </script>

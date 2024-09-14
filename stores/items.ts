@@ -32,18 +32,10 @@ export type Item = {
   name: string;
   createdAt: number;
   lastModified: number;
-  projectId?: number | null;
 } & (Timer | Counter) &
   (Live | Archived);
 
-export type Project = {
-  id: number;
-  name: string;
-};
-
 export const useItemsStore = defineStore("items", () => {
-  const projectsStore = useProjectsStore();
-
   const items = useLocalStorage<Item[]>("items", []);
   if (items) {
     const now = Date.now();
@@ -56,16 +48,8 @@ export const useItemsStore = defineStore("items", () => {
     });
   }
 
-  const selectedItems = computed(() => {
-    return items.value.filter((item) =>
-      projectsStore.currentProject
-        ? item.projectId === projectsStore.currentProject.id
-        : item.projectId === null || item.projectId === undefined
-    );
-  });
-
   const getNextItemName = (type: Item["type"]) => {
-    const existingNames = selectedItems.value
+    const existingNames = items.value
       .filter((i) => i.type === type)
       .map((i) => i.name);
     let index = 1;
@@ -94,7 +78,6 @@ export const useItemsStore = defineStore("items", () => {
       elapsedTime: 0,
       running: false,
       lastStartTime: null,
-      projectId: projectsStore.currentProject? projectsStore.currentProject.id : null,
     };
 
     items.value.push(newItem);
@@ -115,7 +98,6 @@ export const useItemsStore = defineStore("items", () => {
       createdAt: now,
       lastModified: now,
       archivedAt: null,
-      projectId: projectsStore.currentProject? projectsStore.currentProject.id : null,
     };
 
     items.value.push(newItem);
@@ -187,7 +169,7 @@ export const useItemsStore = defineStore("items", () => {
   setInterval(updateRunningTimers, 1000);
 
   return {
-    items: selectedItems,
+    items,
     addNewTimer,
     addNewCounter,
     startTimer,

@@ -1,12 +1,12 @@
 <template>
   <Card :item="item" v-if="item.type === 'timer'" :class="{
-    'border-2 border-green-500': item.type == 'timer' && item.running && !item.archived,
+    'outline outline-2 outline-green-500': item.type == 'timer' && item.running && !item.archived,
   }">
 
     <div class="text-3xl font-bold text-center mb-2">
       {{ formatTime(item.elapsedTime) }}
     </div>
-    
+
     <div v-if="!item.archived" class="flex justify-center space-x-2">
       <button @click="useItemsStore().startTimer(item)"
         class="px-4 py-2 rounded text-white disabled:opacity-50 disabled:cursor-not-allowed"
