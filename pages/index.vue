@@ -2,17 +2,11 @@
   <div class="px-4 py-8 space-y-4">
     <div class="flex justify-between items-center">
       <Breadcrumbs />
-      <ArchiveToggle v-model="showArchive" />
+      <MultipleChoice :active="displayedItems.length > 0" />
     </div>
 
-    <div v-if="displayedItems.length === 0 && showArchive">
-      <EmptyCard>
-        В архиве пока нет элементов. Архивируйте таймер или счетчик, чтобы он появился здесь.
-      </EmptyCard>
-    </div>
-
-    <div v-else class="space-y-4">
-      <div v-if="displayedItems.length === 0 && !showArchive">
+    <div class="space-y-4">
+      <div v-if="displayedItems.length === 0">
         <EmptyCard>
           В папке ещё нет никаких элементов. Добавьте таймер или счётчик, чтобы они появились здесь.
         </EmptyCard>
@@ -22,7 +16,7 @@
       <Item v-else v-for="item in displayedItems" :key="item.id" :item="item" />
 
       <!-- Кнопки добавления нового таймера и счетчика -->
-      <div v-if="!showArchive" class="flex space-x-2">
+      <div class="flex space-x-2">
         <button @click="useItemsStore().addNewTimer"
           class="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">
           Добавить таймер
@@ -38,18 +32,16 @@
       </div>
     </div>
   </div>
+
+  <MassActions :items="massActionItems" />
 </template>
 
 <script setup lang="ts">
-const showArchive = ref(false)
 const items = storeToRefs(useItemsStore()).items
-const archivedItems = storeToRefs(useItemsStore()).archivedItems
+const massActionItems = ref<Item[]>([])
 
 const displayedItems = computed(() => {
-  if (showArchive.value) {
-    return archivedItems.value.filter(item => item.archived).sort((a, b) => b.archivedAt - a.archivedAt)
-  } else {
-    return items.value.filter(item => !item.archived).sort((a, b) => a.createdAt - b.createdAt)
-  }
+  return items.value.sort((a, b) => a.createdAt - b.createdAt)
 })
+
 </script>

@@ -22,23 +22,13 @@ type Timer = {
   elapsedTime: number;
 } & (RunningTimer | StoppedTimer);
 
-type Live = {
-  archived: false;
-  archivedAt: null;
-};
-type Archived = {
-  archived: true;
-  archivedAt: number;
-};
-
 export type Item = {
   id: number;
   parentId?: number;
   name: string;
   createdAt: number;
   lastModified: number;
-} & (Timer | Counter | Folder) &
-  (Live | Archived);
+} & (Timer | Counter | Folder);
 
 export const useItemsStore = defineStore("items", () => {
   const items = useLocalStorage<Item[]>("items", []);
@@ -73,10 +63,6 @@ export const useItemsStore = defineStore("items", () => {
     } else {
       return items.value.filter((item) => item.parentId === undefined);
     }
-  });
-
-  const archivedItems = computed(() => {
-    return items.value.filter((item) => item.archived);
   });
 
   const getNextItemName = (type: Item["type"]) => {
@@ -116,10 +102,8 @@ export const useItemsStore = defineStore("items", () => {
       parentId: currentItemId.value ?? undefined,
       type: "timer",
       name: getNextItemName("timer"),
-      archived: false,
       createdAt: now,
       lastModified: now,
-      archivedAt: null,
       elapsedTime: 0,
       running: false,
       lastStartTime: null,
@@ -138,10 +122,8 @@ export const useItemsStore = defineStore("items", () => {
       type: "counter",
       count: 0,
       name: getNextItemName("counter"),
-      archived: false,
       createdAt: now,
       lastModified: now,
-      archivedAt: null,
     };
 
     items.value.push(newItem);
@@ -156,17 +138,15 @@ export const useItemsStore = defineStore("items", () => {
       parentId: currentItemId.value ?? undefined,
       type: "folder",
       name: getNextItemName("folder"),
-      archived: false,
       createdAt: now,
       lastModified: now,
-      archivedAt: null,
     };
 
     items.value.push(newItem);
   };
 
   const startTimer = (timer: Item) => {
-    if (timer.type === "timer" && !timer.running && !timer.archived) {
+    if (timer.type === "timer" && !timer.running) {
       (timer as unknown as RunningTimer).running = true;
       (timer as unknown as RunningTimer).lastStartTime = Date.now();
     }
@@ -179,20 +159,6 @@ export const useItemsStore = defineStore("items", () => {
       (timer as unknown as StoppedTimer).lastStartTime = null;
       timer.lastModified = Date.now();
     }
-  };
-
-  const toggleArchive = (item: Item) => {
-    if (!item.archived) {
-      if (item.type === "timer") {
-        stopTimer(item);
-      }
-
-      (item as unknown as Archived).archivedAt = Date.now();
-    } else {
-      (item as unknown as Live).archivedAt = null;
-    }
-    item.archived = !item.archived;
-    item.lastModified = Date.now();
   };
 
   const incrementCounter = (counter: Item) => {
@@ -212,10 +178,21 @@ export const useItemsStore = defineStore("items", () => {
   };
 
   const deleteItem = (item: Item) => {
-    const index = items.value.findIndex((i) => i.id === item.id);
-    if (index !== -1) {
-      items.value.splice(index, 1);
-    }
+    const deleteRecursively = (itemId: number) => {
+      const index = items.value.findIndex((i) => i.id === itemId);
+
+      if (index !== -1) {
+        const children = items.value.filter((i) => i.parentId === itemId);
+
+        children.forEach((child) => {
+          deleteRecursively(child.id);
+        });
+
+        items.value.splice(index, 1);
+      }
+    };
+
+    deleteRecursively(item.id);
   };
 
   const updateRunningTimers = () => {
@@ -228,7 +205,7 @@ export const useItemsStore = defineStore("items", () => {
     });
   };
 
-  setInterval(updateRunningTimers, 1000);
+  setInterval(updateRunningTimers, 500);
 
   const selectFolder = (folder?: Item) => {
     if (folder === undefined) {
@@ -246,13 +223,11 @@ export const useItemsStore = defineStore("items", () => {
 
   return {
     items: filteredItems,
-    archivedItems,
     currentItem,
     addNewTimer,
     addNewCounter,
     startTimer,
     stopTimer,
-    toggleArchive,
     incrementCounter,
     decrementCounter,
     addNewFolder,

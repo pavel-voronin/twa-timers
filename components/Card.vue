@@ -1,24 +1,15 @@
 <template>
-  <div class="rounded-lg shadow p-4" :class="{
-    'bg-white': !item.archived,
-    'bg-gray-300': item.archived,
-  }">
+  <div :id="`item-${item.id}-select`" class="rounded-lg shadow py-4 px-2" @click.capture="click">
 
     <div class="flex justify-between items-start mb-2">
       <div class="flex-grow mr-2">
-        <slot name="title">
-          <EditableField v-model="item.name" @update:model-value="item.lastModified = Date.now()"
-            :locked="item.archived" />
-        </slot>
+        <EditableField v-model="item.name" @update:model-value="item.lastModified = Date.now()" />
       </div>
 
-      <div class="flex items-start space-x-2">
-        <button @click="useItemsStore().toggleArchive(item)" class="text-blue-500 hover:text-blue-700 flex-shrink-0">
-          <IconArchive v-if="!item.archived" />
-          <IconRestore v-else />
-        </button>
-
-        <slot name="buttons"></slot>
+      <div class="flex items-start space-x-2 mt-1">
+        <Icon v-if="!selected" name="ic:outline-circle" size="26" class="text-gray-400"
+          :class="[!selectMode && 'opacity-0']" />
+        <Icon v-else name="ic:outline-check-circle" size="26" class="text-blue-600 " />
       </div>
     </div>
 
@@ -29,8 +20,23 @@
 
 <script lang="ts" setup>
 import type { Item } from '~/stores/items';
+const props = defineProps<{ item: Item }>()
 
-defineProps<{ item: Item }>()
+const actionsStore = useActionsStore()
+const selected = computed(() => { return actionsStore.selectedItems.findIndex(item => item === props.item) !== -1 })
+const selectMode = storeToRefs(actionsStore).selectMode
+
+const click = (event: Event) => {
+  if (actionsStore.selectMode) {
+    if (selected.value) {
+      actionsStore.removeItem(props.item)
+    } else {
+      actionsStore.addItem(props.item)
+    }
+
+    event.stopPropagation()
+  }
+}
 </script>
 
 <style></style>

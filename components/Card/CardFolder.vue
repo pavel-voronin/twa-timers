@@ -1,6 +1,13 @@
 <template>
-  <CardArchiveFolder :item="item" v-if="item.archived" />
-  <CardLiveFolder :item="item" v-else />
+  <Card :item="item" v-if="item.type == 'folder'">
+    <div v-if="useItemsStore().currentItem !== item" @click="useItemsStore().selectFolder(item)"
+      class="text-center text-blue-600 underline">
+      перейти &rarr;
+    </div>
+    <div v-else @click="useItemsStore().quitFolder(item)" class="text-center text-blue-600 underline">
+      &larr; выйти
+    </div>
+  </Card>
 </template>
 
 <script lang="ts" setup>

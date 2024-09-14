@@ -10,7 +10,12 @@
       / {{ useItemsStore().currentItem?.name }}
     </div>
   </div>
-  <div v-else></div>
+  <div v-else class="flex items-center space-x-2">
+    <div class="border border-gray-200 text-gray-400 flex items-center justify-center rounded-sm w-6 h-6">
+      <Icon name="ph:house"></Icon>
+    </div>
+    <div>/</div>
+  </div>
 </template>
 
 <script lang="ts" setup>
