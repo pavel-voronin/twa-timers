@@ -5,7 +5,5 @@
 </template>
 
 <script lang="ts" setup>
-import type { Item } from '~/stores/items';
-
 defineProps<{ item: Item }>()
 </script>

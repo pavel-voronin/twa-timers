@@ -1,9 +1,9 @@
 <template>
-  <div v-if="active" @click="selectMode = !selectMode" class="text-blue-500">
+  <div v-if="active" @click="selectMode = !selectMode" class="text-blue-500 cursor-pointer">
     <template v-if="selectMode">Отмена</template>
     <template v-else>Выбрать</template>
   </div>
-  <div v-else class="text-gray-400">Выбрать</div>
+  <div v-else class="text-gray-400 cursor-default">Выбрать</div>
 </template>
 
 <script lang="ts" setup>
