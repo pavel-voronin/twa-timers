@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@iconify/json": "^2.2.248",
+    "@twa-dev/sdk": "^7.10.1",
     "@types/sortablejs": "^1.15.8"
   }
 }
