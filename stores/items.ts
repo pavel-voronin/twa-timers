@@ -4,7 +4,7 @@ export type Item<T extends string = string> = {
   parentId?: number;
   name: string;
   createdAt: number;
-  lastModified: number;
+  order?: number;
 };
 
 export type WidgetConfig = {
@@ -54,13 +54,13 @@ export const useItemsStore = defineStore("items", () => {
   });
 
   const filteredItems = computed(() => {
-    if (currentItemId.value) {
-      return items.value.filter(
-        (item) => item.parentId === currentItemId.value
-      );
-    } else {
-      return items.value.filter((item) => item.parentId === undefined);
-    }
+    return items.value
+      .filter(
+        (item) =>
+          item.parentId ===
+          (currentItemId.value !== null ? currentItemId.value : undefined)
+      )
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   });
 
   const getNextItemName = (baseName: string) => {
@@ -81,7 +81,7 @@ export const useItemsStore = defineStore("items", () => {
     items.value.length > 0 ? Math.max(...items.value.map((i) => i.id)) + 1 : 1;
 
   const addNewItem = <T extends Item = never>(
-    item: Omit<T, "id" | "parentId" | "createdAt" | "lastModified">
+    item: Omit<T, "id" | "parentId" | "createdAt">
   ) => {
     const now = Date.now();
 
@@ -91,7 +91,7 @@ export const useItemsStore = defineStore("items", () => {
       parentId: currentItemId.value ?? undefined,
       name: getNextItemName(item.name),
       createdAt: now,
-      lastModified: now,
+      order: filteredItems.value.length,
     };
 
     const length = items.value.push(newItem);
@@ -125,6 +125,28 @@ export const useItemsStore = defineStore("items", () => {
     deleteRecursively(item.id);
   };
 
+  const moveItem = (oldIndex?: number, newIndex?: number) => {
+    if (
+      oldIndex === undefined ||
+      newIndex === undefined ||
+      newIndex === oldIndex
+    ) {
+      return;
+    }
+
+    const itemToMove = filteredItems.value[oldIndex];
+    const targetItem = filteredItems.value[newIndex];
+
+    itemToMove.order =
+      (targetItem.order ?? 0) - 0.5 * Math.sign(oldIndex - newIndex);
+
+    filteredItems.value
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+      .forEach((item, index) => {
+        item.order = index;
+      });
+  };
+
   return {
     widgets,
 
@@ -133,5 +155,6 @@ export const useItemsStore = defineStore("items", () => {
     currentItemId,
     addNewItem,
     deleteItem,
+    moveItem,
   };
 });

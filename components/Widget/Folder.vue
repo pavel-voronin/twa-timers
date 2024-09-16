@@ -28,19 +28,6 @@ export const config: WidgetConfig = {
       name: "Папка",
     });
   },
-  init(item: any) {
-    setInterval(() => {
-      const now = Date.now();
-
-      if (item.running) {
-        item.elapsedTime += now - item.lastStartTime;
-        item.lastStartTime = now;
-      }
-    }, 500);
-  },
-  destroy(item: any) {
-    console.log(`destroy ${item}`);
-  }
 };
 </script>
 

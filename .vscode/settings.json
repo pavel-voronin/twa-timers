@@ -1,6 +1,8 @@
 {
   "cSpell.language": "en,ru",
   "cSpell.words": [
-    "Nuxt"
-  ]
+    "Nuxt",
+    "sortablejs"
+  ],
+  "css.customData": [".vscode/tailwind.json"]
 }
