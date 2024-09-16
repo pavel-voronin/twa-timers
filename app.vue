@@ -11,12 +11,5 @@ useHead({
   meta: [
     { name: 'viewport', content: 'width=device-width, user-scalable=no' }
   ],
-  script: [
-    {
-      src: useAppConfig().baseURL + "/telegram-web-app.js",
-      type: "text/javascript",
-      fetchpriority: "high",
-    },
-  ]
 })
 </script>
