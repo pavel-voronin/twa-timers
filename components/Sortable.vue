@@ -26,10 +26,10 @@ const canMoveDown = computed(() =>
 )
 
 const moveUp = () => {
-  itemsStore.moveItem(currentIndex.value, currentIndex.value - 1)
+  itemsStore.reorderItem(currentIndex.value, currentIndex.value - 1)
 }
 
 const moveDown = () => {
-  itemsStore.moveItem(currentIndex.value, currentIndex.value + 1)
+  itemsStore.reorderItem(currentIndex.value, currentIndex.value + 1)
 }
 </script>

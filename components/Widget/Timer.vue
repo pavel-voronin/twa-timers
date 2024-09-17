@@ -64,6 +64,7 @@ setInterval(() => {
 export const config: WidgetConfig = {
   name: "timer",
   label: "Таймер",
+  canContain: false,
   add() {
     useItemsStore().addNewItem<Timer>({
       type: "timer",

@@ -10,6 +10,7 @@ export type Item<T extends string = string> = {
 export type WidgetConfig = {
   name: string;
   label: string;
+  canContain: boolean;
   add: () => void;
   init?: (item: any) => void;
   destroy?: (item: any) => void;
@@ -125,7 +126,7 @@ export const useItemsStore = defineStore("items", () => {
     deleteRecursively(item.id);
   };
 
-  const moveItem = (oldIndex?: number, newIndex?: number) => {
+  const reorderItem = (oldIndex?: number, newIndex?: number) => {
     if (
       oldIndex === undefined ||
       newIndex === undefined ||
@@ -147,6 +148,23 @@ export const useItemsStore = defineStore("items", () => {
       });
   };
 
+  const moveItems = (_items: Item[], parent: Item | undefined) => {
+    for (const item of _items) {
+      item.parentId = parent?.id;
+      item.order = items.value.filter(
+        (item) => item.parentId === parent?.id
+      ).length;
+    }
+  };
+
+  const parent = (ofItem: Item) => {
+    if (ofItem.parentId === undefined) {
+      return undefined;
+    }
+
+    return items.value.find((item) => item.id === ofItem.parentId);
+  };
+
   return {
     widgets,
 
@@ -155,6 +173,9 @@ export const useItemsStore = defineStore("items", () => {
     currentItemId,
     addNewItem,
     deleteItem,
-    moveItem,
+    reorderItem,
+    moveItems,
+
+    parent,
   };
 });
