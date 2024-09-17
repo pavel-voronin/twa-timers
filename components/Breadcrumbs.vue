@@ -1,6 +1,6 @@
 <template>
 
-  <div v-if="item" class="flex items-center space-x-2">
+  <div v-if="item" class="flex items-center space-x-2 select-none">
 
     <div @click="home"
       class="border border-gray-600 flex items-center justify-center rounded-sm w-6 h-6 cursor-pointer">
@@ -17,7 +17,7 @@
 
   </div>
 
-  <div v-else class="flex items-center space-x-2">
+  <div v-else class="flex items-center space-x-2 select-none">
 
     <div class="border border-gray-200 text-gray-400 flex items-center justify-center rounded-sm w-6 h-6">
       <Icon name="ph:house"></Icon>

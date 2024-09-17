@@ -17,14 +17,11 @@
     "@vueuse/nuxt": "^11.0.3",
     "nuxt": "^3.13.0",
     "pinia": "^2.2.2",
-    "sortablejs": "^1.15.3",
-    "sortablejs-vue3": "^1.2.11",
     "vue": "latest",
     "vue-router": "latest"
   },
   "devDependencies": {
     "@iconify/json": "^2.2.248",
-    "@twa-dev/sdk": "^7.10.1",
-    "@types/sortablejs": "^1.15.8"
+    "@twa-dev/sdk": "^7.10.1"
   }
 }

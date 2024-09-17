@@ -1,5 +1,5 @@
 <template>
-  <div v-if="active" @click="selectMode = !selectMode" class="text-blue-500 cursor-pointer">
+  <div v-if="active" @click="selectMode = !selectMode" class="text-blue-500 cursor-pointer select-none">
     <template v-if="selectMode">Отмена</template>
     <template v-else>Выбрать</template>
   </div>

@@ -1,4 +1,6 @@
 export const useActionsStore = defineStore("actions", () => {
+  const sortMode = ref(false);
+
   const selectMode = ref(false);
   const selectedItems = ref<Item[]>([]);
 
@@ -21,14 +23,31 @@ export const useActionsStore = defineStore("actions", () => {
     () => useItemsStore().currentItem,
     () => {
       selectMode.value = false;
+      sortMode.value = false;
     }
   );
 
   watch(selectMode, (selectMode) => {
     if (!selectMode) {
       clear();
+    } else {
+      sortMode.value = false
     }
   });
 
-  return { selectMode, selectedItems, addItem, removeItem, clear };
+  watch(sortMode, (sortMode) => {
+    if (sortMode) {
+      selectMode.value = false
+    }
+  });
+
+  return {
+    selectMode,
+    selectedItems,
+    addItem,
+    removeItem,
+    clear,
+
+    sortMode,
+  };
 });

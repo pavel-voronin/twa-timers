@@ -8,6 +8,7 @@
     </template>
 
     <template #top-right>
+      <Sortable :item="item" />
       <Selectable :item="item" />
     </template>
 

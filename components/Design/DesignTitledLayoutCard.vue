@@ -2,7 +2,7 @@
   <DesignCard class="flex flex-col space-y-2 relative select-none" v-bind="$attrs">
 
     <div class="flex justify-between items-start space-x-2">
-      <div class="flex-grow">
+      <div class="flex-grow min-h-8">
         <slot name="top-left">
           <p class="text-lg font-semibold line-clamp-2">
             Title

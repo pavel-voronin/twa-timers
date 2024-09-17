@@ -1,8 +1,10 @@
 <template>
   <div class="px-4 py-8 space-y-4">
-    <div class="flex justify-between items-center">
+    <div class="flex justify-end items-center space-x-4">
       <Breadcrumbs />
-      <MultipleChoice :active="items.length > 0" />
+      <div class="flex-grow" />
+      <EnableSort :active="items.length > 1" />
+      <EnableSelect :active="items.length > 0" />
     </div>
 
     <div class="space-y-4">
@@ -12,12 +14,12 @@
         </DesignEmptyCard>
       </div>
 
-      <LayoutColumn v-else/>
+      <LayoutColumn v-else />
 
       <!-- Кнопки добавления нового таймера и счетчика -->
       <div class="flex space-x-2">
         <button v-for="(widget, key, i) in widgets" :key="key"
-          @click="!useActionsStore().selectMode ? widget.config.add() : null" class="flex-1 text-white py-2 rounded-lg"
+          @click="!useActionsStore().selectMode ? widget.config.add() : null" class="flex-1 text-white p-2 rounded-lg select-none"
           :class="[useActionsStore().selectMode && 'bg-red-500 opacity-50 grayscale cursor-default' || colors[i % colors.length]]">
           Добавить {{ widget.config.label.toLowerCase() }}
         </button>
