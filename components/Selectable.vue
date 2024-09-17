@@ -2,7 +2,7 @@
   <div v-if="selectMode">
     <Icon @click="click" v-if="!selected" name="ic:outline-circle" size="26" class="text-gray-400" />
     <Icon @click="click" v-else name="ic:outline-check-circle" size="26" class="text-blue-600 " />
-    <div @click.capture="click" class="z-50 absolute inset-0 cursor-pointer"></div>
+    <div @click.capture="click" class="z-40 absolute inset-0 cursor-pointer"></div>
   </div>
 </template>
 
