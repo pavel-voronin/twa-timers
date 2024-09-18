@@ -11,4 +11,5 @@ export const config: WidgetConfig = {
     useItemsStore().addNewItem<Counter>({ type: 'counter', name: 'Счётчик', count: 0 })
   },
 }
+export default {}
 </script>

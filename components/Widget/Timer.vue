@@ -40,4 +40,5 @@ export const config: WidgetConfig = {
     });
   },
 };
+export default {}
 </script>
