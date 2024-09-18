@@ -1,6 +1,4 @@
 <script lang="ts">
-import type { WidgetConfig } from '~/stores/items';
-
 export type Counter = Item<"counter"> & {
   count: number;
 };
