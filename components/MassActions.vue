@@ -32,11 +32,11 @@ function remove() {
   }
 }
 
-const canMoveOut = computed(() => itemsStore.currentItemId !== null && selectedItems.value.length > 0)
+const canMoveOut = computed(() => itemsStore.currentItem.id !== 0 && selectedItems.value.length > 0)
 
 function moveOut() {
   if (canMoveOut.value) {
-    itemsStore.moveItems(selectedItems.value, itemsStore.parent(itemsStore.currentItem!))
+    itemsStore.moveItems(selectedItems.value, itemsStore.parent(itemsStore.currentItem)!)
     selectMode.value = false
     actionsStore.clear()
   }

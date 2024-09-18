@@ -1,10 +1,11 @@
+import { capitalize } from "vue";
+
 export type Item<T extends string = string> = {
   type: T;
   id: number;
-  parentId?: number;
+  parentId: number | null;
   name: string;
-  createdAt: number;
-  order?: number;
+  order: number;
 };
 
 export type WidgetConfig = {
@@ -12,13 +13,12 @@ export type WidgetConfig = {
   label: string;
   canContain: boolean;
   add: () => void;
-  init?: (item: any) => void;
-  destroy?: (item: any) => void;
 };
 
 type StoredWidget = {
   config: WidgetConfig;
   widget: Component;
+  in: Record<string, Component>;
 };
 
 export const useItemsStore = defineStore("items", () => {
@@ -30,42 +30,84 @@ export const useItemsStore = defineStore("items", () => {
         })
       ).map(([_, v]: any) => [
         v.config.name,
-        { config: v.config, widget: shallowRef(v.default) },
+        {
+          config: v.config,
+          widget: shallowRef(v.default),
+          in: Object.fromEntries(
+            Object.entries(
+              import.meta.glob(`../components/Widget/*Has/*.vue`, {
+                eager: true,
+              })
+            )
+              .filter(([file]: any) =>
+                new RegExp(
+                  `\.\./components/Widget/.*Has/${capitalize(
+                    v.config.name
+                  )}\.vue`
+                ).test(file)
+              )
+              .map(([file, m]: any) => {
+                const ctx = file.match(/(\w+)Has/)[1].toLowerCase();
+
+                return [ctx, shallowRef(m.default)];
+              })
+          ),
+        },
       ])
     )
   );
 
   const items = useLocalStorage<Item[]>("items", []);
-  items.value.forEach((item) => {
-    if (item.type in widgets.value && widgets.value[item.type].config.init) {
-      widgets.value[item.type].config.init!(item);
-    }
-  });
+  const version = useLocalStorage<number>("version", 0);
+  const currentItemId = useLocalStorage<number>("current_item_id", 0);
 
-  const currentItemId = useLocalStorage<number | null>(
-    "current_item_id",
-    null,
-    {
-      serializer: NumberSerializer,
+  function migrate() {
+    if (version.value === 0) {
+      items.value = [
+        {
+          type: "folder",
+          id: 0,
+          parentId: null,
+          name: "",
+          order: 0,
+        },
+        ...items.value.map((item) => ({
+          ...item,
+          parentId: (item.parentId as number | undefined) ?? 0,
+          name: item.name,
+          order: item.order ?? 0,
+        })),
+      ];
+
+      currentItemId.value = 0;
+
+      version.value = 1;
     }
-  );
+  }
+
+  migrate();
 
   const currentItem = computed(() => {
-    return items.value.find((item) => item.id === currentItemId.value);
+    const item = items.value.find((item) => item.id === currentItemId.value);
+
+    if (item !== undefined) {
+      return item;
+    }
+
+    console.log(`current_item_id was broken. Fallback to root`);
+    currentItemId.value = 0;
+
+    return items.value.find((item) => item.id === currentItemId.value)!;
   });
 
-  const filteredItems = computed(() => {
-    return items.value
-      .filter(
-        (item) =>
-          item.parentId ===
-          (currentItemId.value !== null ? currentItemId.value : undefined)
-      )
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-  });
+  const childrenItems = computed(() =>
+    items.value
+      .filter((item) => item.parentId === currentItemId.value)
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+  );
 
-  const getNextItemName = (baseName: string) => {
-    const existingNames = filteredItems.value.map((i) => i.name);
+  function getNextItemName(baseName: string): string {
+    const existingNames = childrenItems.value.map((i) => i.name);
 
     let index = 1;
     let newName = `${baseName} ${index}`;
@@ -76,40 +118,33 @@ export const useItemsStore = defineStore("items", () => {
     }
 
     return newName;
-  };
+  }
 
-  const getNewId = (): number =>
-    items.value.length > 0 ? Math.max(...items.value.map((i) => i.id)) + 1 : 1;
+  function getNewId(): number {
+    return items.value.length > 0
+      ? Math.max(...items.value.map((i) => i.id)) + 1
+      : 1;
+  }
 
-  const addNewItem = <T extends Item = never>(
-    item: Omit<T, "id" | "parentId" | "createdAt">
-  ) => {
-    const now = Date.now();
-
+  function addNewItem<T extends Item = never>(
+    item: Omit<T, "id" | "parentId" | "order">
+  ) {
     const newItem: Item = {
       ...item,
       id: getNewId(),
-      parentId: currentItemId.value ?? undefined,
+      parentId: currentItemId.value,
       name: getNextItemName(item.name),
-      createdAt: now,
-      order: filteredItems.value.length,
+      order: childrenItems.value.length,
     };
 
-    const length = items.value.push(newItem);
-    if (
-      newItem.type in widgets.value &&
-      widgets.value[newItem.type].config.init
-    ) {
-      widgets.value[newItem.type].config.init!(items.value[length - 1]);
-    }
-  };
+    items.value.push(newItem);
+  }
 
   const deleteItem = (item: Item) => {
     const deleteRecursively = (itemId: number) => {
       const index = items.value.findIndex((i) => i.id === itemId);
 
       if (index !== -1) {
-        const type = items.value[index].type;
         const children = items.value.filter((i) => i.parentId === itemId);
 
         children.forEach((child) => {
@@ -117,9 +152,6 @@ export const useItemsStore = defineStore("items", () => {
         });
 
         items.value.splice(index, 1);
-        if (type in widgets.value && widgets.value[type].config.destroy) {
-          widgets.value[type].config.destroy!(items.value[index]);
-        }
       }
     };
 
@@ -135,40 +167,48 @@ export const useItemsStore = defineStore("items", () => {
       return;
     }
 
-    const itemToMove = filteredItems.value[oldIndex];
-    const targetItem = filteredItems.value[newIndex];
+    const itemToMove = childrenItems.value[oldIndex];
+    const targetItem = childrenItems.value[newIndex];
 
     itemToMove.order =
       (targetItem.order ?? 0) - 0.5 * Math.sign(oldIndex - newIndex);
 
-    filteredItems.value
+    childrenItems.value
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
       .forEach((item, index) => {
         item.order = index;
       });
   };
 
-  const moveItems = (_items: Item[], parent: Item | undefined) => {
+  const moveItems = (_items: Item[], parent: Item) => {
     for (const item of _items) {
-      item.parentId = parent?.id;
+      item.parentId = parent.id;
       item.order = items.value.filter(
-        (item) => item.parentId === parent?.id
+        (item) => item.parentId === parent.id
       ).length;
     }
   };
 
-  const parent = (ofItem: Item) => {
-    if (ofItem.parentId === undefined) {
-      return undefined;
+  const parent = (ofItem: Item): Item | null => {
+    if (ofItem.parentId === null) {
+      return null;
     }
 
-    return items.value.find((item) => item.id === ofItem.parentId);
+    return items.value.find((item) => item.id === ofItem.parentId) ?? null;
+  };
+
+  const children = (ofItem: Item): Item[] => {
+    return items.value.filter((item) => item.id === ofItem.id);
+  };
+
+  const go = (item: Item | null) => {
+    currentItemId.value = item?.id ?? 0;
   };
 
   return {
     widgets,
 
-    items: filteredItems,
+    items: childrenItems,
     currentItem,
     currentItemId,
     addNewItem,
@@ -177,5 +217,8 @@ export const useItemsStore = defineStore("items", () => {
     moveItems,
 
     parent,
+    children,
+
+    go,
   };
 });
