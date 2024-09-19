@@ -3,16 +3,22 @@
 </template>
 
 <script lang="ts" setup>
+import { capitalize } from 'vue';
+
 const props = defineProps<{ item: Item, asRoot: boolean }>()
 const itemsStore = useItemsStore()
 
 const resolvedComponent = computed(() => {
   if (props.asRoot) {
-    return itemsStore.widgets[props.item.type].widget
+    return useComponentResolver(capitalize(props.item.type))
   } else {
-    const parentComponent = itemsStore.parent(props.item)!.type
+    const componentName = capitalize(props.item.type)
+    const parentComponent = capitalize(itemsStore.parent(props.item)!.type)
 
-    return itemsStore.widgets[props.item.type].in[parentComponent]
+    console.log(useComponentResolver(`${componentName}In${parentComponent}`));
+
+
+    return useComponentResolver(`${componentName}In${parentComponent}`)
   }
 })
 </script>

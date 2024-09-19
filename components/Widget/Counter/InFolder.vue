@@ -10,6 +10,7 @@
     <template #top-right>
       <Sortable :item="item" />
       <Selectable :item="item" />
+      <Configurable :item="item" />
     </template>
 
     <div class="flex justify-center items-center space-x-4">
@@ -33,7 +34,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Counter } from '../Counter.vue';
+import type { Counter } from './definition';
 
 const props = defineProps<{ item: Counter }>()
 

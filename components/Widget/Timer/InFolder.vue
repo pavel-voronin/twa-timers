@@ -12,6 +12,7 @@
     <template #top-right>
       <Sortable :item="item" />
       <Selectable :item="item" />
+      <Configurable :item="item" />
     </template>
 
     <div class="text-3xl font-bold text-center mb-2">
@@ -34,7 +35,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Timer } from '../Timer.vue';
+import type { Timer } from './definition';
 
 const props = defineProps<{ item: Timer }>();
 

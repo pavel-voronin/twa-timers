@@ -1,5 +1,3 @@
-import { capitalize } from "vue";
-
 export type Item<T extends string = string> = {
   type: T;
   id: number;
@@ -8,55 +6,7 @@ export type Item<T extends string = string> = {
   order: number;
 };
 
-export type WidgetConfig = {
-  name: string;
-  label: string;
-  canContain: boolean;
-  add: () => void;
-};
-
-type StoredWidget = {
-  config: WidgetConfig;
-  widget: Component;
-  in: Record<string, Component>;
-};
-
 export const useItemsStore = defineStore("items", () => {
-  const widgets = ref<Record<string, StoredWidget>>(
-    Object.fromEntries(
-      Object.entries(
-        import.meta.glob("../components/Widget/*.vue", {
-          eager: true,
-        })
-      ).map(([_, v]: any) => [
-        v.config.name,
-        {
-          config: v.config,
-          widget: shallowRef(v.default),
-          in: Object.fromEntries(
-            Object.entries(
-              import.meta.glob(`../components/Widget/*Has/*.vue`, {
-                eager: true,
-              })
-            )
-              .filter(([file]: any) =>
-                new RegExp(
-                  `\.\./components/Widget/.*Has/${capitalize(
-                    v.config.name
-                  )}\.vue`
-                ).test(file)
-              )
-              .map(([file, m]: any) => {
-                const ctx = file.match(/(\w+)Has/)[1].toLowerCase();
-
-                return [ctx, shallowRef(m.default)];
-              })
-          ),
-        },
-      ])
-    )
-  );
-
   const items = useLocalStorage<Item[]>("items", []);
   const version = useLocalStorage<number>("version", 0);
   const currentItemId = useLocalStorage<number>("current_item_id", 0);
@@ -206,8 +156,6 @@ export const useItemsStore = defineStore("items", () => {
   };
 
   return {
-    widgets,
-
     items: childrenItems,
     currentItem,
     currentItemId,

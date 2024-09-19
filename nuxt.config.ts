@@ -21,4 +21,8 @@ export default defineNuxtConfig({
       dirs: ["./types/**/*", "./types"],
     },
   },
+  components: {
+    global: true,
+    dirs: ["~/components/Widget", "~/components"],
+  },
 });

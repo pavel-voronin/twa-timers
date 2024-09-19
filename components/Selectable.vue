@@ -1,6 +1,6 @@
 <template>
   <div v-if="selectMode" class="flex space-x-2">
-    <Icon @click="move" v-if="useItemsStore().widgets[item.type].config.canContain && !selected && selectedItems.length"
+    <Icon @click="move" v-if="$widgets.widgets[item.type].canContain && !selected && selectedItems.length"
       name="majesticons:inbox-in-line" size="26" class="text-blue-600 z-50 cursor-pointer flex space-x-2" />
     <Icon @click="click" v-if="!selected" name="ic:outline-circle" size="26" class="text-gray-400" />
     <Icon @click="click" v-else name="ic:outline-check-circle" size="26" class="text-blue-600 " />

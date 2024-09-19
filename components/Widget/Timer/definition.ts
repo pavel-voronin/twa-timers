@@ -1,29 +1,29 @@
-<script lang="ts">
 export type Timer = Item<"timer"> & {
   elapsedTime: number;
 } & (
     | {
-      running: true;
-      lastStartTime: number;
-    }
+        running: true;
+        lastStartTime: number;
+      }
     | {
-      running: false;
-      lastStartTime: null;
-    }
+        running: false;
+        lastStartTime: null;
+      }
   );
 
-const timers = computed<Timer[]>(() => useItemsStore().items.filter(({ type }) => type === 'timer') as Timer[])
+const timers = computed<Timer[]>(
+  () => useItemsStore().items.filter(({ type }) => type === "timer") as Timer[]
+);
 
 setInterval(() => {
   const now = Date.now();
 
   timers.value.forEach((timer: Timer) => {
-
     if (timer.running) {
       timer.elapsedTime += now - timer.lastStartTime;
       timer.lastStartTime = now;
     }
-  })
+  });
 }, 1000);
 
 export const config: WidgetConfig = {
@@ -40,5 +40,3 @@ export const config: WidgetConfig = {
     });
   },
 };
-export default {}
-</script>
