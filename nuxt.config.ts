@@ -25,4 +25,9 @@ export default defineNuxtConfig({
     global: true,
     dirs: ["~/components/Widget", "~/components"],
   },
+  icon: {
+    clientBundle: {
+      scan: true,
+    },
+  },
 });
