@@ -10,7 +10,7 @@
         </slot>
       </div>
 
-      <div class="flex items-start space-x-2">
+      <div class="flex items-start space-x-2 flex-shrink-0">
         <slot name="top-right">
           <Icon name="tdesign:letters-f" size="26" />
         </slot>
