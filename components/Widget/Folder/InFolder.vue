@@ -9,7 +9,6 @@
     <template #top-right>
       <Sortable :item="item" />
       <Selectable :item="item" />
-      <Configurable :item="item" />
     </template>
 
     <div @click="$items.go(item)" class="text-center text-blue-600 underline cursor-pointer">

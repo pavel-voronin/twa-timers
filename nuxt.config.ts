@@ -22,8 +22,10 @@ export default defineNuxtConfig({
     },
   },
   components: {
-    global: true,
-    dirs: ["~/components/Widget", "~/components"],
+    dirs: [
+      { path: "~/components/Widget", extensions: ["vue"], global: true },
+      "~/components",
+    ],
   },
   icon: {
     clientBundle: {

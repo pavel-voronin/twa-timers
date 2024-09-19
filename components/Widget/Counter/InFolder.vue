@@ -10,7 +10,6 @@
     <template #top-right>
       <Sortable :item="item" />
       <Selectable :item="item" />
-      <Configurable :item="item" />
     </template>
 
     <div class="flex justify-center items-center space-x-4">
