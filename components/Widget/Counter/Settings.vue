@@ -9,14 +9,18 @@
       </div>
 
       <DesignCard class="space-y-4">
-        <FormField v-model="item.name" label="Название" />
+        <FormTextareaField v-model="item.name" label="Название" />
+        <FormNumberField v-model="item.step" label="Шаг" min="1" />
+        <FormNumberField v-model="item.from" label="От" :max="item.to" />
+        <FormNumberField v-model="item.to" label="До" :min="item.from" />
       </DesignCard>
-
     </div>
 
   </div>
 </template>
 
 <script lang="ts" setup>
-defineProps<{ item: Item }>()
+import type { Counter } from './definition';
+
+const props = defineProps<{ item: Counter }>()
 </script>

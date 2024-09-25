@@ -9,7 +9,7 @@
       </div>
 
       <DesignCard class="space-y-4">
-        <FormField v-model="item.name" label="Название" />
+        <FormTextareaField v-model="item.name" label="Название" />
       </DesignCard>
 
     </div>

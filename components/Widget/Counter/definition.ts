@@ -1,5 +1,8 @@
 export type Counter = Item<"counter"> & {
   count: number;
+  step: number;
+  from: number | null;
+  to: number | null;
 };
 
 export const config: WidgetConfig = {
@@ -11,6 +14,9 @@ export const config: WidgetConfig = {
       type: "counter",
       name: "Счётчик",
       count: 0,
+      step: 1,
+      from: 0,
+      to: null,
     });
   },
 };
