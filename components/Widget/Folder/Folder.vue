@@ -15,7 +15,7 @@
           </DesignEmptyCard>
         </div>
 
-        <Item v-else :as-root="false" v-for="item in $items.items" :key="item.id" :item="item" />
+        <Item v-else :as-root="false" v-for="item in $items.items" :key="item.id" :item="item" :subitem="null" />
 
         <!-- Кнопки добавления нового таймера и счетчика -->
         <div class="flex space-x-2">

@@ -5,18 +5,15 @@
 <script lang="ts" setup>
 import { capitalize } from 'vue';
 
-const props = defineProps<{ item: Item, asRoot: boolean }>()
+const props = defineProps<{ item: Item, subitem: string | null, asRoot: boolean }>()
 const itemsStore = useItemsStore()
 
 const resolvedComponent = computed(() => {
   if (props.asRoot) {
-    return useComponentResolver(capitalize(props.item.type))
+    return useComponentResolver(capitalize(props.item.type) + (props.subitem ? capitalize(props.subitem) : ''))
   } else {
     const componentName = capitalize(props.item.type)
     const parentComponent = capitalize(itemsStore.parent(props.item)!.type)
-
-    console.log(useComponentResolver(`${componentName}In${parentComponent}`));
-
 
     return useComponentResolver(`${componentName}In${parentComponent}`)
   }

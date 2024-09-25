@@ -1,3 +1,3 @@
 <template>
-  <Item :item="$items.currentItem" :as-root="true" />
+  <Item :item="$items.currentItem" :subitem="$items.currentSubItem" :as-root="true" />
 </template>

@@ -10,6 +10,10 @@ export const useItemsStore = defineStore("items", () => {
   const items = useLocalStorage<Item[]>("items", []);
   const version = useLocalStorage<number>("version", 0);
   const currentItemId = useLocalStorage<number>("current_item_id", 0);
+  const currentSubItem = useLocalStorage<string | null>(
+    "current_subitem",
+    null
+  );
 
   function migrate() {
     if (version.value === 0) {
@@ -151,13 +155,15 @@ export const useItemsStore = defineStore("items", () => {
     return items.value.filter((item) => item.id === ofItem.id);
   };
 
-  const go = (item: Item | null) => {
+  const go = (item: Item | null, subitem?: string) => {
     currentItemId.value = item?.id ?? 0;
+    currentSubItem.value = subitem ?? null;
   };
 
   return {
     items: childrenItems,
     currentItem,
+    currentSubItem,
     currentItemId,
     addNewItem,
     deleteItem,
