@@ -9,6 +9,8 @@ export default defineNuxtPlugin((nuxtApp) => {
 
       WebApp.ready();
       WebApp.disableVerticalSwipes();
+      WebApp.setHeaderColor("#f9fafb");
+      WebApp.setBackgroundColor("#f9fafb");
 
       useTelegram().setWebApp(WebApp);
     });
