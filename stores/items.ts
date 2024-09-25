@@ -9,7 +9,7 @@ export type Item<T extends string = string> = {
 export const useItemsStore = defineStore("items", () => {
   const items = useLocalStorage<Item[]>("items", []);
   const version = useLocalStorage<number>("version", 0);
-  const currentItemId = ref(0) //useLocalStorage<number>("current_item_id", 0);
+  const currentItemId = useLocalStorage<number>("current_item_id", 0);
   const currentSubItem = useLocalStorage<string | null>(
     "current_subitem",
     null
